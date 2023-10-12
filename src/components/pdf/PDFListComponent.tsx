@@ -14,7 +14,7 @@ export const PDFListComponent: React.FC<{ list: PDFList }> = ({ list }) => {
         <div
           ref={provided.innerRef}
           {...provided.droppableProps}
-          className="flex flex-1 gap-4 border border-blue-600 bg-gray-200 p-4"
+          className="flex flex-1 gap-4 overflow-x-auto border border-blue-600 bg-gray-200 p-4"
         >
           {list.pages.map((page, index) => (
             <Draggable key={page.id} draggableId={page.id} index={index}>
