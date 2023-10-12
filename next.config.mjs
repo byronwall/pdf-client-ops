@@ -9,10 +9,16 @@ const config = {
   reactStrictMode: true,
 
   experimental: {
-    serverComponentsExternalPackages: ["@prisma/client", "bcryptjs"],
+    serverComponentsExternalPackages: [],
+    esmExternals: "loose", // required to make Konva & react-konva work
   },
   images: {
     unoptimized: true,
+  },
+  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
+    config.resolve.alias.canvas = false;
+    config.resolve.alias.encoding = false;
+    return config;
   },
 };
 export default config;

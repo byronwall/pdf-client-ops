@@ -1,20 +1,43 @@
 import { create } from "zustand";
 
-export type RawCsvData = Record<string, string>;
-
-type ImportStore = {
-  isOpen: boolean;
-  setIsOpen: (isOpen: boolean) => void;
-
-  csvContent: RawCsvData[];
-  setCsvContent: (csvContent: RawCsvData[]) => void;
+export type PDFPage = {
+  id: string;
+  imageData: string;
+  originalPageNumber: number;
 };
 
-export const useImportStore = create<ImportStore>((set) => ({
-  isOpen: false,
-  setIsOpen: (isOpen: boolean) => set({ isOpen }),
+// Define the type for a PDF List
+export type PDFList = {
+  id: string;
+  pages: PDFPage[];
+};
 
-  csvContent: [],
-  setCsvContent: (csvContent: RawCsvData[]) =>
-    set({ csvContent, isOpen: true }),
+type ImportStore = {
+  pdfLists: PDFList[];
+
+  setOriginalList: (originalList: PDFList) => void;
+
+  setPdfLists: (pdfList: PDFList[]) => void;
+};
+
+export const usePdfData = create<ImportStore>((set) => ({
+  pdfLists: [],
+
+  setOriginalList: (pdfList) => {
+    // add one blank list to the end
+
+    return set({
+      pdfLists: [
+        pdfList,
+        {
+          id: "extract1",
+          pages: [],
+        },
+      ],
+    });
+  },
+
+  setPdfLists: (pdfLists) => {
+    return set({ pdfLists });
+  },
 }));
