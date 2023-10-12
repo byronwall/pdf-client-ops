@@ -1,5 +1,3 @@
-
-
 import { type Icons } from "@/components/icons";
 
 export type NavItem = {
