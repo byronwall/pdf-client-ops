@@ -2,7 +2,7 @@
 "use client";
 import { Draggable } from "react-beautiful-dnd";
 
-import { type PDFList } from "~/stores/useImportStore";
+import { type PDFList } from "~/stores/usePdfData";
 
 import { PDFPageComponent } from "./PDFPageComponent";
 import { StrictModeDroppable } from "./StrictModeDroppable";
@@ -14,7 +14,7 @@ export const PDFListComponent: React.FC<{ list: PDFList }> = ({ list }) => {
         <div
           ref={provided.innerRef}
           {...provided.droppableProps}
-          className="flex flex-1 gap-4 overflow-x-auto border border-blue-600 bg-gray-200 p-4"
+          className="min-h-32 flex flex-1 gap-4 overflow-x-auto border border-blue-600 bg-gray-200 p-4"
         >
           {list.pages.map((page, index) => (
             <Draggable key={page.id} draggableId={page.id} index={index}>

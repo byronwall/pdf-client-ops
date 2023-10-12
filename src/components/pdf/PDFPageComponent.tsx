@@ -3,7 +3,7 @@
 
 import Image from "next/image";
 
-import { type PDFPage } from "~/stores/useImportStore";
+import { type PDFPage } from "~/stores/usePdfData";
 
 export const PDFPageComponent: React.FC<{ page: PDFPage }> = ({ page }) => {
   return (

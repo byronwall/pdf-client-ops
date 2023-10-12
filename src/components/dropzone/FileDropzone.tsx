@@ -1,15 +1,10 @@
 "use client";
 
-import * as pdfjsLib from "pdfjs-dist";
-import pdfWorker from "pdfjs-dist/build/pdf.worker.min";
-
-pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
-
 import { useCallback } from "react";
 import { type DropzoneOptions, useDropzone } from "react-dropzone";
 
 import { cn } from "~/lib/utils";
-import { type PDFList, usePdfData } from "~/stores/useImportStore";
+import { usePdfData } from "~/stores/usePdfData";
 
 type Props = {
   className?: string;
@@ -29,7 +24,7 @@ export function FileDropzone({ children, className }: Props) {
 
     const reader = new FileReader();
 
-    reader.onload = async () => {
+    reader.onload = () => {
       const result = reader.result;
 
       if (typeof result !== "string") return;
@@ -38,52 +33,7 @@ export function FileDropzone({ children, className }: Props) {
 
       if (!base64String) return;
 
-      const originalPdf: PDFList = {
-        id: "original",
-        pages: [],
-      };
-
-      // create  a buffer from the base64 string
-      const pdfBuffer = Buffer.from(base64String, "base64");
-
-      // Load PDF with PDF.js
-      const pdf = await pdfjsLib.getDocument({ data: pdfBuffer }).promise;
-
-      // Loop through each page
-      const numPages = pdf.numPages;
-      for (let i = 1; i <= numPages; i++) {
-        const page = await pdf.getPage(i);
-
-        // Prepare canvas using PDF page dimensions
-        const canvas = document.createElement("canvas");
-        const viewport = page.getViewport({ scale: 0.5 }); // scale to 20% for thumbnail
-
-        const context = canvas.getContext("2d");
-
-        if (!context) return;
-
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
-
-        // Render PDF page into canvas context
-        const renderContext = {
-          canvasContext: context,
-          viewport: viewport,
-        };
-
-        await page.render(renderContext).promise;
-
-        // get base 64 string from canvas
-        const base64StringFromCanvas = canvas.toDataURL("image/png");
-
-        originalPdf.pages.push({
-          id: "page" + i.toString(),
-          originalPageNumber: i,
-          imageData: base64StringFromCanvas,
-        });
-
-        setOriginalList(originalPdf);
-      }
+      setOriginalList(base64String);
 
       // process PDF and update global state
     };
