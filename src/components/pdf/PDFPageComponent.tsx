@@ -7,7 +7,7 @@ import { type PDFPage } from "~/stores/usePdfData";
 
 export const PDFPageComponent: React.FC<{ page: PDFPage }> = ({ page }) => {
   return (
-    <div className="h-44 w-44 border border-black">
+    <div className="w-44 border border-black">
       <Image
         src={page.imageData}
         alt={`Page ${page.id}`}

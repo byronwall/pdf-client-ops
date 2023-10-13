@@ -3,6 +3,7 @@ import "~/styles/globals.css";
 import { Analytics } from "@vercel/analytics/react";
 import { type Metadata } from "next";
 
+import { FileDropzone } from "~/components/dropzone/FileDropzone";
 import { MainNav } from "~/components/nav/main-nav";
 import { marketingConfig } from "~/config/marketing";
 
@@ -24,20 +25,20 @@ export default function RootLayout({
   return (
     <html>
       <body>
-        <div className="flex min-h-screen flex-col pb-20">
-          <header className="container z-40 bg-background">
-            <div className="flex h-20 items-center justify-between py-6">
-              <MainNav items={marketingConfig.mainNav} />
-            </div>
-          </header>
-          <main className="flex-1">
-            <div className="container flex max-w-full flex-col gap-4 overflow-x-hidden">
+        <FileDropzone className="m-4">
+          <div className="flex min-h-screen flex-col">
+            <header className="container z-40 bg-background">
+              <div className="flex h-20 items-center justify-between py-6">
+                <MainNav items={marketingConfig.mainNav} />
+              </div>
+            </header>
+            <main className="container flex max-w-full flex-1 shrink-0 flex-col gap-4 overflow-x-hidden pb-8">
               {children}
-            </div>
-          </main>
-        </div>
+            </main>
+          </div>
 
-        <Analytics />
+          <Analytics />
+        </FileDropzone>
       </body>
     </html>
   );

@@ -3,6 +3,7 @@
 import { useCallback } from "react";
 import { type DropzoneOptions, useDropzone } from "react-dropzone";
 
+import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
 import { usePdfData } from "~/stores/usePdfData";
 
@@ -43,7 +44,7 @@ export function FileDropzone({ children, className }: Props) {
 
   const onDrop = useCallback(onDropRaw, [setOriginalList]);
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+  const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     onDrop,
     noClick: true,
     noDragEventsBubbling: true,
@@ -55,6 +56,10 @@ export function FileDropzone({ children, className }: Props) {
         <input {...getInputProps()} />
 
         {children}
+
+        <div>
+          <Button onClick={open}>Open file picker</Button>
+        </div>
       </div>
     </div>
   );

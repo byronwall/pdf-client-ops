@@ -28,7 +28,18 @@ type ImportStore = {
   setOriginalList: (pdfBase64: string) => void;
   setPdfLists: (pdfList: PDFList[]) => void;
 
-  doExtraction: () => void;
+  downloadAllPdfs: () => void;
+  downloadSinglePdf: (listId: string) => void;
+
+  addBlankPDF: () => void; // Method to add a blank PDF
+  resetToOriginal: () => void; // Method to reset to the original state
+  clearAll: () => void;
+
+  splitEveryPageIntoOwnPdf: () => void;
+
+  removeSingleList: (id: string) => void;
+
+  changeNameOfList: (id: string, newName: string) => void;
 };
 
 export const usePdfData = create<ImportStore>((set, get) => ({
@@ -113,7 +124,7 @@ export const usePdfData = create<ImportStore>((set, get) => ({
     return set({ pdfLists });
   },
 
-  doExtraction: async () => {
+  downloadAllPdfs: async () => {
     const { pdfBase64, pdfLists } = get();
 
     if (!pdfBase64) return;
@@ -123,34 +134,152 @@ export const usePdfData = create<ImportStore>((set, get) => ({
     // Load the PDF into a PDFDocument object
     const originalPdfDoc = await PDFDocument.load(pdfBase64);
 
-    // Create a new PDFDocument
-    const newPdfDoc = await PDFDocument.create();
-
     // run through the pdfLists and create document based on originalPageNumber
 
     const newPdfs = pdfLists.filter((pdfList) => pdfList.id !== "original");
 
+    let count = 0;
+
     for (const pdfList of newPdfs) {
-      const pagesToCopy = pdfList.pages.map((page) => page.originalPageNumber);
+      await createPdfFromList(pdfList, originalPdfDoc);
 
-      const copiedPages = await newPdfDoc.copyPages(
-        originalPdfDoc,
-        pagesToCopy
-      );
-
-      copiedPages.forEach((page) => newPdfDoc.addPage(page));
-
-      // Serialize to bytes and create Blob
-      const pdfBytes = await newPdfDoc.save();
-      const blob = new Blob([pdfBytes], { type: "application/pdf" });
-
-      // Generate a download link for the new PDF
-      const link = document.createElement("a");
-      link.href = window.URL.createObjectURL(blob);
-      link.download = "extracted_pages.pdf";
-      link.click();
+      // pause every 10 pdfs
+      if (++count >= 10) {
+        await pause(1000);
+        count = 0;
+      }
     }
 
     set({ isDoingExtraction: false });
   },
+
+  downloadSinglePdf: async (listId) => {
+    const { pdfBase64, pdfLists } = get();
+
+    if (!pdfBase64) return;
+
+    set({ isDoingExtraction: true });
+
+    // Load the PDF into a PDFDocument object
+    const originalPdfDoc = await PDFDocument.load(pdfBase64);
+
+    // run through the pdfLists and create document based on originalPageNumber
+
+    const newPdf = pdfLists.find((pdfList) => pdfList.id === listId);
+
+    if (!newPdf) return;
+
+    await createPdfFromList(newPdf, originalPdfDoc);
+
+    set({ isDoingExtraction: false });
+  },
+
+  addBlankPDF: () => {
+    const { pdfLists } = get();
+
+    const newPdfList: PDFList = {
+      id: "extract" + (pdfLists.length + 1).toString(),
+      pages: [],
+    };
+
+    set({ pdfLists: [...pdfLists, newPdfList] });
+  },
+  clearAll: () => {
+    set({
+      pdfLists: [],
+      pdfBase64: undefined,
+      pdfBuffer: undefined,
+      isLoadingThumbnail: false,
+      isDoingExtraction: false,
+    });
+  },
+
+  resetToOriginal: () => {
+    const { pdfBase64 } = get();
+
+    if (!pdfBase64) return;
+
+    set({ pdfLists: [] });
+
+    return get().setOriginalList(pdfBase64);
+  },
+  changeNameOfList: (id, newName) => {
+    const { pdfLists } = get();
+
+    const newList = pdfLists.map((pdfList) => {
+      if (pdfList.id === id) {
+        return { ...pdfList, id: newName };
+      }
+      return pdfList;
+    });
+
+    set({ pdfLists: newList });
+  },
+  splitEveryPageIntoOwnPdf: () => {
+    const { pdfLists } = get();
+
+    const newPdfLists = [...pdfLists];
+
+    const newBaseName = prompt("Enter a base name for the new PDFs");
+
+    if (!newBaseName) return;
+
+    // find the original pdf
+    const originalPdf = pdfLists.find((pdfList) => pdfList.id === "original");
+
+    if (!originalPdf) return;
+
+    originalPdf.pages.forEach((page) => {
+      const newPdfList: PDFList = {
+        id: newBaseName + " page" + (page.originalPageNumber + 1).toString(),
+        pages: [page],
+      };
+
+      newPdfLists.push(newPdfList);
+    });
+
+    // remove the original pdf pages
+
+    originalPdf.pages = [];
+
+    set({ pdfLists: newPdfLists });
+  },
+
+  removeSingleList: (id) => {
+    const { pdfLists } = get();
+
+    const newPdfLists = pdfLists.filter((pdfList) => pdfList.id !== id);
+
+    set({ pdfLists: newPdfLists });
+  },
 }));
+
+async function createPdfFromList(
+  pdfList: PDFList,
+  originalPdfDoc: PDFDocument
+) {
+  // Create a new PDFDocument
+  const newPdfDoc = await PDFDocument.create();
+
+  const pagesToCopy = pdfList.pages.map((page) => page.originalPageNumber);
+
+  const copiedPages = await newPdfDoc.copyPages(originalPdfDoc, pagesToCopy);
+
+  copiedPages.forEach((page) => newPdfDoc.addPage(page));
+
+  // Serialize to bytes and create Blob
+  const pdfBytes = await newPdfDoc.save();
+  const blob = new Blob([pdfBytes], { type: "application/pdf" });
+
+  // Generate a download link for the new PDF
+  const link = document.createElement("a");
+  link.href = window.URL.createObjectURL(blob);
+  link.download = pdfList.id + ".pdf";
+  link.click();
+}
+
+function pause(msec: number) {
+  return new Promise((resolve, reject) => {
+    setTimeout(resolve, msec || 1000);
+  });
+}
