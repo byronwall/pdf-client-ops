@@ -3,7 +3,6 @@
 import { useCallback } from "react";
 import { type DropzoneOptions, useDropzone } from "react-dropzone";
 
-import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
 import { usePdfData } from "~/stores/usePdfData";
 
@@ -52,14 +51,14 @@ export function FileDropzone({ children, className }: Props) {
 
   return (
     <div className={cn({ "ring-2 ring-primary": isDragActive }, className)}>
-      <div {...getRootProps()}>
+      <div {...getRootProps()} className="flex-1">
         <input {...getInputProps()} />
 
         {children}
 
-        <div>
+        {/* <div className="absolute bottom-4 left-4">
           <Button onClick={open}>Open file picker</Button>
-        </div>
+        </div> */}
       </div>
     </div>
   );
