@@ -23,7 +23,7 @@ export function PdfMgr() {
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <div className="flex gap-2">
+      <div className="flex justify-center gap-2">
         <Button onClick={doExtraction}>Download all new PDFs</Button>
         <Button onClick={addBlankPdf}>Add blank PDF</Button>
         <Button onClick={resetToOriginal}>Reset to original</Button>

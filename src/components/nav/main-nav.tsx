@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import * as React from "react";
 
@@ -23,7 +24,7 @@ export function MainNav({ items, children }: MainNavProps) {
     <div className="flex w-full justify-between ">
       <div className="flex gap-6 md:gap-10">
         <Link href="/" className="hidden items-center space-x-2 md:flex">
-          <Icons.logo />
+          <Image src="/logo.png" width={64} height={64} alt={siteConfig.name} />
           <span className="hidden font-bold sm:inline-block">
             {siteConfig.name}
           </span>
